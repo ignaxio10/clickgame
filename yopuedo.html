@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Juego de Clicks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+  <div id="languageMenu">
+    <label for="languageSelect">Idioma:</label>
+    <select id="languageSelect" onchange="setLanguage(this.value)">
+      <option value="es">Español</option>
+      <option value="en">English</option>
+    </select>
+  </div>
+
+  <div id="interface">
+    <h1 id="gameTitle">Juego de Clicks</h1>
+    <button onclick="startGame()" id="startButton" class="circular-button">Comenzar</button>
+    <button onclick="openStore()" id="storeButton">Tienda</button>
+  </div>
+
+  <div id="game" style="display: none;">
+    <p id="clickCounter">Clics: 0.0</p>
+    <button onclick="incrementClicks()" class="circular-button" id="clickButton">Haz clic</button>
+    <button onclick="returnToInterface()" class="circular-button" id="returnButton">Volver a la interfaz</button>
+  </div>
+
+  <div id="store" style="display: none;">
+    <h2>Tienda</h2>
+    <p>Clics disponibles: <span id="clicksAvailable">0.0</span></p>
+    <div class="store-item">
+      <h3>Item 1</h3>
+      <p>Costo: 1000 clics</p>
+      <p class="multiplier">Multiplicador: 1.2x</p>
+      <button onclick="buyItem(1000, 1.2, 1)">Comprar</button>
+    </div>
+    <div class="store-item">
+      <h3>Item 2</h3>
+      <p>Costo: 10000 clics</p>
+      <p class="multiplier">Multiplicador: 1.5x</p>
+      <button onclick="buyItem(10000, 1.5, 2)">Comprar</button>
+    </div>
+    <div class="store-item">
+      <h3>Item 3</h3>
+      <p>Costo: 100000 clics</p>
+      <p class="multiplier">Multiplicador: 2x</p>
+      <button onclick="buyItem(100000, 2, 3)">Comprar</button>
+    </div>
+    <div class="store-item">
+      <h3>Item 4</h3>
+      <p>Costo: 1000000 clics</p>
+      <p class="multiplier">Multiplicador: 3.5x</p>
+      <button onclick="buyItem(1000000, 3.5, 4)">Comprar</button>
+    </div>
+
+    <button onclick="returnToInterfaceFromStore()">Volver al Interfaz</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
