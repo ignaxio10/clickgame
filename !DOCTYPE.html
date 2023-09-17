@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Juego de Clicks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f9f9f9;
+      padding: 20px;
+    }
+
+    #interface, #game, #store {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 80%;
+      margin: 0 auto;
+      margin-top: 20px;
+    }
+
+    .circular-button {
+      padding: 30px;
+      font-size: 24px;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      margin: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s ease;
+    }
+
+    .circular-button:hover {
+      background-color: #2980benn;
+    }
+
+    .restart-button {
+      background-color: #2ecc71;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      margin-top: 20px;
+      display: inline-block;
+    }
+
+    .restart-button:hover {
+      background-color: #27ae60;
+    }
+
+    #clickCounter {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    #userInfo {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    /* Estilos para la tienda */
+    .store-item button[disabled] {
+      background-color: #e0e0e0;
+      cursor: not-allowed;
+    }
+
+    .store-item button {
+      margin-top: 10px;
+    }
+
+    .store-item .multiplier {
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    #storeButton {
+      background-color: #e74c3c;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+      display: inline-block;
+    }
+
+    #storeButton:hover {
+      background-color: #c0392b;
+    }
+
+    .store-item button.purchased {
+      background-color: #2ecc71;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50%;
+      cursor: not-allowed;
+      margin-top: 20px;
+      display: inline-block;
+    }
+
+    .store-item button.already-purchased {
+      background-color: #e0e0e0;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50%;
+      cursor: not-allowed;
+      margin-top: 20px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div id="languageMenu">
+    <label for="languageSelect">Idioma:</label>
+    <select id="languageSelect" onchange="changeLanguage()">
+      <option value="es">Español</option>
+      <option value="en">English</option>
+    </select>
+  </div>
+
+  <div id="interface">
+    <h1 id="gameTitle">Juego de Clicks</h1>
+    <button onclick="startGame()" class="circular-button">Comenzar</button>
+    <button onclick="openStore()" id="storeButton">Tienda</button>
+  </div>
+
+  <div id="game" style="display: none;">
+    <p id="clickCounter">Clics: 0.0</p>
+    <button onclick="incrementClick()" class="circular-button">Haz clic</button>
+    <button onclick="returnToInterface()" class="restart-button">Volver a la interfaz</button>
+  </div>
+
+  <div id="store" style="display: none;">
+    <h2>Tienda</h2>
+    <p>Clics disponibles: <span id="clicksAvailable"></span></p>
+    <div class="store-item">
+      <h3>Item 1</h3>
+      <p>Costo: 1000 clics</p>
+      <p class="multiplier">Multiplicador: 1.2x</p>
+      <button onclick="buyItem(1000, 1.2, 1)">Comprar</button>
+    </div>
+    <div class="store-item">
+      <h3>Item 2</h3>
+      <p>Costo: 10000 clics</p>
+      <p class="multiplier">Multiplicador: 1.5x</p>
+      <button onclick="buyItem(10000, 1.5, 2)">Comprar</button>
+    </div>
+    <div class="store-item">
+      <h3>Item 3</h3>
+      <p>Costo: 100000 clics</p>
+      <p class="multiplier">Multiplicador: 2x</p>
+      <button onclick="buyItem(100000, 2, 3)">Comprar</button>
+    </div>
+    <div class="store-item">
+      <h3>Item 4</h3>
+      <p>Costo: 1000000 clics</p>
+      <p class="multiplier">Multiplicador: 3.5x</p>
+      <button onclick="buyItem(1000000, 3.5, 4)">Comprar</button>
+    </div>
+
+    <button onclick="returnToInterfaceFromStore()">Volver al Interfaz</button>
+  </div>
+
+  <script>
+    let username = '';
+    let hasUsername = false;
+    let language = 'es';
+    let clicks = parseFloat(localStorage.getItem('clicks')) || 0.0;
+    let clickMultiplier = 1.0;
+    let boughtItems = JSON.parse(localStorage.getItem('boughtItems')) || [];
+
+    const storedClicks = parseFloat(localStorage.getItem('clicks'));
+    if (!isNaN(storedClicks)) {
+      clicks = storedClicks;
+    }
+
+    const storedBoughtItems = JSON.parse(localStorage.getItem('boughtItems'));
+    if (storedBoughtItems) {
+      boughtItems = storedBoughtItems;
+    }
+
+    const textos = {
+      'es': {
+        'gameTitle': 'Juego de Clicks',
+        'startButton': 'Comenzar',
+        'clicksLabel': 'Clics',
+        'clickButton': 'Haz clic',
+        'welcomeMessage': 'Bienvenido',
+        'totalClicksMessage': 'Total de Clics',
+        'returnToInterface': 'Volver al Interfaz'
+      },
+      'en': {
+        'gameTitle': 'Clicker Game',
+        'startButton': 'Start',
+        'clicksLabel': 'Clicks',
+        'clickButton': 'Click me!',
+        'welcomeMessage': 'Welcome',
+        'totalClicksMessage': 'Total Clicks',
+        'returnToInterface': 'Return to Interface'
+      }
+    };
+
+    function openStore() {
+      document.getElementById('interface').style.display = 'none';
+      document.getElementById('store').style.display = 'block';
+      updateClicksAvailable();
+      updateStoreButtons();
+    }
+
+    function updateClicksAvailable() {
+      const clicksAvailableElement = document.getElementById('clicksAvailable');
+      const formattedClicks = parseFloat(clicks).toFixed(1); // Show only 1 digit after the decimal point
+      clicksAvailableElement.innerText = formattedClicks;
+    }
+
+    function updateStoreButtons() {
+      const items = document.querySelectorAll('.store-item button');
+      items.forEach((button, index) => {
+        if (hasBoughtItem(index + 1)) {
+          button.innerText = 'Comprado';
+          button.className = 'purchased';
+          button.disabled = true;
+        }
+      });
+    }
+
+    function buyItem(cost, multiplier, itemIndex) {
+      if (hasBoughtItem(itemIndex)) {
+        alert('Ya has comprado este ítem.');
+      } else if (clicks >= cost) {
+        clicks -= cost;
+        clickMultiplier += multiplier;
+        updateClickCounter();
+        saveBoughtItem(itemIndex);
+        updateStoreButtons();
+        alert('¡Has comprado este ítem!');
+      } else {
+        alert('No tienes suficientes clics para comprar esto.');
+      }
+    }
+
+    function hasBoughtItem(itemIndex) {
+      return boughtItems.includes(itemIndex);
+    }
+
+    function saveBoughtItem(itemIndex) {
+      boughtItems.push(itemIndex);
+      saveProgress();
+    }
+
+    function returnToInterfaceFromStore() {
+      document.getElementById('store').style.display = 'none';
+      document.getElementById('interface').style.display = 'block';
+    }
+
+    function returnToInterface() {
+      document.getElementById('game').style.display = 'none';
+      document.getElementById('interface').style.display = 'block';
+
+      const userInfoElement = document.getElementById('userInfo');
+      const formattedClicks = parseFloat(clicks).toFixed(1); // Show only 1 digit after the decimal point
+      userInfoElement.innerText = textos[language]['welcomeMessage'] + ', ' + username + '! ' + textos[language]['totalClicksMessage'] + ': ' + formattedClicks;
+    }
+
+    function startGame() {
+      if (!hasUsername) {
+        const usernameInput = prompt(textos[language]['welcomeMessage'] + ' - ' + textos[language]['startButton']);
+        username = usernameInput ? usernameInput.trim() : '';
+
+        if (username === '') {
+          alert(textos[language]['startButton'] + ': ' + 'Por favor, ingresa un nombre de usuario válido.');
+          return;
+        }
+
+        hasUsername = true;
+      }
+
+      document.getElementById('interface').style.display = 'none';
+      document.getElementById('game').style.display = 'block';
+
+      loadProgress();
+
+      // Update the text for the "Haz clic" button
+      document.querySelectorAll('.circular-button')[1].innerText = textos[language]['clickButton'];
+    }
+
+    function changeLanguage() {
+      const languageSelect = document.getElementById('languageSelect');
+      language = languageSelect.value;
+      updateTexts();
+    }
+
+    function updateTexts() {
+      document.getElementById('gameTitle').innerText = textos[language]['gameTitle'];
+      document.querySelector('.circular-button').innerText = textos[language]['startButton'];
+      const formattedClicks = parseFloat(clicks).toFixed(1); // Show only 1 digit after the decimal point
+      document.getElementById('clickCounter').innerText = textos[language]['clicksLabel'] + ': ' + formattedClicks;
+      document.querySelectorAll('.circular-button')[1].innerText = textos[language]['clickButton'];
+      document.querySelector('.restart-button').innerText = textos[language]['returnToInterface'];
+    }
+
+    function incrementClick() {
+      clicks += clickMultiplier;
+      updateClickCounter();
+
+      // Check for milestones (1000, 10000, 100000, 1000000, 10000000, 100000000)
+      if (clicks === 1000) {
+        alert('¡Felicidades! Has alcanzado 1000 clics.');
+      } else if (clicks === 10000) {
+        alert('¡Increíble! Has alcanzado 10000 clics.');
+      } else if (clicks === 100000) {
+        alert('¡WOW! Has alcanzado 100000 clics. ¡Eres increíble!');
+      } else if (clicks === 1000000) {
+        alert('¡Asombroso! Has alcanzado 1000000 clics. Sigue así.');
+      } else if (clicks === 10000000) {
+        alert('¡Impresionante! Has alcanzado 10000000 clics. Eres una leyenda.');
+      } else if (clicks === 100000000) {
+        alert('¡Fenomenal! Has alcanzado 100000000 clics. Eres una leyenda viviente.');
+      }
+    }
+
+    function updateClickCounter() {
+      const clickCounterElement = document.getElementById('clickCounter');
+      const formattedClicks = parseFloat(clicks).toFixed(1); // Show only 1 digit after the decimal point
+      clickCounterElement.innerText = textos[language]['clicksLabel'] + ': ' + formattedClicks;
+      updateClicksAvailable(); // Update clicks available in the store
+    }
+
+    function loadProgress() {
+      updateClickCounter();
+    }
+
+    function saveProgress() {
+      // Guardar el progreso en localStorage
+      localStorage.setItem('clicks', clicks);
+      localStorage.setItem('boughtItems', JSON.stringify(boughtItems));
+    }
+
+    window.onload = () => {
+      updateTexts();
+      loadProgress();
+    };
+  </script>
+</body>
+</html>
